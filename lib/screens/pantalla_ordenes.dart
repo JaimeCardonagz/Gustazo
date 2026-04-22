@@ -52,71 +52,68 @@ class _PantallaOrdenesState extends State<PantallaOrdenes> {
     });
   }
 
-  void _mostrarDialogoPropina() {
-    double propina = 0;
-    
-    showDialog(
+  void _mostrarDialogoPropina() async {
+    double? propinaSeleccionada = await showDialog<double>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('¿Hubo propina?', style: TextStyle(fontSize: 20)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text('Seleccione el monto de propina:', style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 10,
-                runSpacing: 10,
-                children: [
-                  _botonPropina(setDialogState, 0, 'Sin propina'),
-                  _botonPropina(setDialogState, 5, '\$5'),
-                  _botonPropina(setDialogState, 10, '\$10'),
-                  _botonPropina(setDialogState, 20, '\$20'),
-                  _botonPropina(setDialogState, 50, '\$50'),
-                ],
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Otro monto',
-                  prefixText: '\$ ',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: (value) {
-                  propina = double.tryParse(value) ?? 0;
-                },
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar', style: TextStyle(fontSize: 16)),
+      builder: (context) => AlertDialog(
+        title: const Text('¿Hubo propina?', style: TextStyle(fontSize: 20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Seleccione el monto de propina:', style: TextStyle(fontSize: 16)),
+            const SizedBox(height: 20),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                _botonPropinaSimple(0, 'Sin propina'),
+                _botonPropinaSimple(5, '\$5'),
+                _botonPropinaSimple(10, '\$10'),
+                _botonPropinaSimple(20, '\$20'),
+                _botonPropinaSimple(50, '\$50'),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _finalizarOrden(propina);
-              },
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                backgroundColor: Colors.green,
+            const SizedBox(height: 20),
+            TextField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Otro monto',
+                prefixText: '\$ ',
+                border: OutlineInputBorder(),
               ),
-              child: const Text('Confirmar', style: TextStyle(fontSize: 16, color: Colors.white)),
+              onChanged: (value) {
+                // El usuario puede escribir un monto personalizado
+              },
             ),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, 0.0),
+            child: const Text('Cancelar', style: TextStyle(fontSize: 16)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context, 0.0);
+            },
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+              backgroundColor: Colors.green,
+            ),
+            child: const Text('Confirmar', style: TextStyle(fontSize: 16, color: Colors.white)),
+          ),
+        ],
       ),
     );
+
+    if (propinaSeleccionada != null) {
+      _finalizarOrden(propinaSeleccionada);
+    }
   }
 
-  Widget _botonPropina(Function(double) setDialogState, double monto, String label) {
+  Widget _botonPropinaSimple(double monto, String label) {
     return ElevatedButton(
-      onPressed: () {
-        setDialogState(() => propina = monto);
-      },
+      onPressed: () => Navigator.pop(context, monto),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         minimumSize: const Size(80, 60),
