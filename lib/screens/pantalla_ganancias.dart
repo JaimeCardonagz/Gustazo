@@ -37,7 +37,7 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
             gananciaBruta = provider.gananciaBrutaQuincenal;
             totalPagos = provider.totalPagosQuincenal;
             gananciaNeta = provider.gananciaNetaQuincenal;
-            tituloPeriodo = ahora.day <= 15 
+            tituloPeriodo = ahora.day <= 15
                 ? 'QUINCENA 1: ${DateFormat('dd/MM').format(DateTime(ahora.year, ahora.month, 1))} - 15'
                 : 'QUINCENA 2: 16 - ${DateFormat('dd/MM').format(DateTime(ahora.year, ahora.month + 1, 1).subtract(const Duration(days: 1)))}';
             break;
@@ -45,21 +45,27 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
             gananciaBruta = provider.gananciaBrutaMensual;
             totalPagos = provider.totalPagosMensual;
             gananciaNeta = provider.gananciaNetaMensual;
-            tituloPeriodo = 'MES: ${DateFormat('MMMM yyyy', 'es_ES').format(ahora).toUpperCase()}';
+            tituloPeriodo =
+                'MES: ${DateFormat('MMMM yyyy', 'es_ES').format(ahora).toUpperCase()}';
             break;
         }
 
-        final ordenesCompletadas = provider.ordenes.where((o) => 
-          o.estado == EstadoOrden.completada && _estaEnFiltro(o.fechaCreacion, ahora)
-        ).length;
+        final ordenesCompletadas = provider.ordenes
+            .where((o) =>
+                o.estado == EstadoOrden.completada &&
+                _estaEnFiltro(o.fechaCreacion, ahora))
+            .length;
 
         final itemsVendidos = provider.ordenes
-          .where((o) => o.estado == EstadoOrden.completada && _estaEnFiltro(o.fechaCreacion, ahora))
-          .fold(0, (sum, o) => sum + o.cantidadTotalItems);
+            .where((o) =>
+                o.estado == EstadoOrden.completada &&
+                _estaEnFiltro(o.fechaCreacion, ahora))
+            .fold(0, (sum, o) => sum + o.cantidadTotalItems);
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('📊 Ganancias', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            title: const Text('📊 Ganancias',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             backgroundColor: Colors.green.shade700,
             foregroundColor: Colors.white,
             actions: [
@@ -69,7 +75,9 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
                     await provider.iniciarDia();
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('✅ Día iniciado'), backgroundColor: Colors.green),
+                        const SnackBar(
+                            content: Text('✅ Día iniciado'),
+                            backgroundColor: Colors.green),
                       );
                     }
                   },
@@ -78,7 +86,8 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orange,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
                 )
               else
@@ -87,7 +96,9 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
                     await provider.cerrarDia();
                     if (mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('🌙 Día cerrado'), backgroundColor: Colors.blue),
+                        const SnackBar(
+                            content: Text('🌙 Día cerrado'),
+                            backgroundColor: Colors.blue),
                       );
                     }
                   },
@@ -96,7 +107,8 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                   ),
                 ),
             ],
@@ -109,38 +121,52 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
                 // Selector de filtro
                 Center(
                   child: SegmentedButton<FiltroTiempo>(
-                    segments: FiltroTiempo.values.map((f) => ButtonSegment(
-                      value: f,
-                      label: Text(f.nombre, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      icon: Icon(_iconoFiltro(f)),
-                    )).toList(),
+                    segments: FiltroTiempo.values
+                        .map((f) => ButtonSegment(
+                              value: f,
+                              label: Text(f.nombre,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold)),
+                              icon: Icon(_iconoFiltro(f)),
+                            ))
+                        .toList(),
                     selected: {_filtro},
-                    onSelectionChanged: (selected) => setState(() => _filtro = selected.first),
+                    onSelectionChanged: (selected) =>
+                        setState(() => _filtro = selected.first),
                     showSelectedIcon: false,
                   ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Título del período
                 Center(
-                  child: Text(tituloPeriodo, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  child: Text(tituloPeriodo,
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey)),
                 ),
                 const SizedBox(height: 24),
 
                 // Tarjetas de métricas
                 Row(
                   children: [
-                    _tarjetaMetrica('💰 Ventas', '\$${gananciaBruta.toStringAsFixed(2)}', Colors.blue),
+                    _tarjetaMetrica('💰 Ventas',
+                        '\$${gananciaBruta.toStringAsFixed(2)}', Colors.blue),
                     const SizedBox(width: 12),
-                    _tarjetaMetrica('👥 Pagos', '\$${totalPagos.toStringAsFixed(2)}', Colors.red),
+                    _tarjetaMetrica('👥 Pagos',
+                        '\$${totalPagos.toStringAsFixed(2)}', Colors.red),
                   ],
                 ),
                 const SizedBox(height: 12),
-                _tarjetaMetrica('📈 GANANCIA NETA', '\$${gananciaNeta.toStringAsFixed(2)}', 
-                  gananciaNeta >= 0 ? Colors.green : Colors.red, esGrande: true),
-                
+                _tarjetaMetrica(
+                    '📈 GANANCIA NETA',
+                    '\$${gananciaNeta.toStringAsFixed(2)}',
+                    gananciaNeta >= 0 ? Colors.green : Colors.red,
+                    esGrande: true),
+
                 const SizedBox(height: 24),
-                
+
                 // Gráfico
                 Card(
                   elevation: 4,
@@ -149,7 +175,9 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Distribución', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text('Distribución',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 16),
                         SizedBox(
                           height: 200,
@@ -158,17 +186,25 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
                               sections: [
                                 PieChartSectionData(
                                   value: gananciaBruta,
-                                  title: 'Ganancia Bruta\n\$${gananciaBruta.toStringAsFixed(2)}',
+                                  title:
+                                      'Ganancia Bruta\n\$${gananciaBruta.toStringAsFixed(2)}',
                                   color: Colors.green,
                                   radius: 80,
-                                  titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                  titleStyle: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
                                 ),
                                 PieChartSectionData(
                                   value: totalPagos,
-                                  title: 'Pagos\n\$${totalPagos.toStringAsFixed(2)}',
+                                  title:
+                                      'Pagos\n\$${totalPagos.toStringAsFixed(2)}',
                                   color: Colors.red,
                                   radius: 80,
-                                  titleStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+                                  titleStyle: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
                                 ),
                               ],
                               sectionsSpace: 2,
@@ -191,12 +227,22 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('📋 Estadísticas', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        const Text('📋 Estadísticas',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
                         const Divider(),
-                        _filaEstadistica('Órdenes completadas', ordenesCompletadas.toString()),
-                        _filaEstadistica('Items vendidos', itemsVendidos.toString()),
-                        _filaEstadistica('Productos con stock bajo', provider.getProductosConStockBajo().length.toString()),
-                        _filaEstadistica('Empleados registrados', provider.empleados.length.toString()),
+                        _filaEstadistica('Órdenes completadas',
+                            ordenesCompletadas.toString()),
+                        _filaEstadistica(
+                            'Items vendidos', itemsVendidos.toString()),
+                        _filaEstadistica(
+                            'Productos con stock bajo',
+                            provider
+                                .getProductosConStockBajo(10)
+                                .length
+                                .toString()),
+                        _filaEstadistica('Empleados registrados',
+                            provider.empleados.length.toString()),
                       ],
                     ),
                   ),
@@ -204,25 +250,35 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
 
                 // Botones de exportación (Mejora 2)
                 const SizedBox(height: 24),
-                const Text('📤 Exportar Reporte', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const Text('📤 Exportar Reporte',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () => _exportarPDF(provider, ahora),
-                        icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-                        label: const Text('PDF', style: TextStyle(color: Colors.white)),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.red, padding: const EdgeInsets.symmetric(vertical: 15)),
+                        icon: const Icon(Icons.picture_as_pdf,
+                            color: Colors.white),
+                        label: const Text('PDF',
+                            style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            padding: const EdgeInsets.symmetric(vertical: 15)),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () => _exportarCSV(provider, ahora),
-                        icon: const Icon(Icons.table_chart, color: Colors.white),
-                        label: const Text('CSV', style: TextStyle(color: Colors.white)),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green, padding: const EdgeInsets.symmetric(vertical: 15)),
+                        icon:
+                            const Icon(Icons.table_chart, color: Colors.white),
+                        label: const Text('CSV',
+                            style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            padding: const EdgeInsets.symmetric(vertical: 15)),
                       ),
                     ),
                   ],
@@ -238,9 +294,11 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
   bool _estaEnFiltro(DateTime fecha, DateTime ahora) {
     switch (_filtro) {
       case FiltroTiempo.hoy:
-        return fecha.year == ahora.year && fecha.month == ahora.month && fecha.day == ahora.day;
+        return fecha.year == ahora.year &&
+            fecha.month == ahora.month &&
+            fecha.day == ahora.day;
       case FiltroTiempo.quincenal:
-        final inicio = ahora.day <= 15 
+        final inicio = ahora.day <= 15
             ? DateTime(ahora.year, ahora.month, 1)
             : DateTime(ahora.year, ahora.month, 16);
         return fecha.isAfter(inicio.subtract(const Duration(days: 1)));
@@ -251,16 +309,21 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
 
   IconData _iconoFiltro(FiltroTiempo filtro) {
     switch (filtro) {
-      case FiltroTiempo.hoy: return Icons.today;
-      case FiltroTiempo.quincenal: return Icons.date_range;
-      case FiltroTiempo.mensual: return Icons.calendar_month;
+      case FiltroTiempo.hoy:
+        return Icons.today;
+      case FiltroTiempo.quincenal:
+        return Icons.date_range;
+      case FiltroTiempo.mensual:
+        return Icons.calendar_month;
     }
   }
 
-  Widget _tarjetaMetrica(String titulo, String valor, Color color, {bool esGrande = false}) {
+  Widget _tarjetaMetrica(String titulo, String valor, Color color,
+      {bool esGrande = false}) {
     return Expanded(
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: esGrande ? 24 : 16, horizontal: 12),
+        padding:
+            EdgeInsets.symmetric(vertical: esGrande ? 24 : 16, horizontal: 12),
         decoration: BoxDecoration(
           color: Color.fromRGBO(
             (color.r * 255.0).round() & 0xff,
@@ -273,9 +336,17 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
         ),
         child: Column(
           children: [
-            Text(titulo, style: TextStyle(fontSize: esGrande ? 18 : 14, fontWeight: FontWeight.bold, color: color)),
+            Text(titulo,
+                style: TextStyle(
+                    fontSize: esGrande ? 18 : 14,
+                    fontWeight: FontWeight.bold,
+                    color: color)),
             const SizedBox(height: 8),
-            Text(valor, style: TextStyle(fontSize: esGrande ? 32 : 20, fontWeight: FontWeight.bold, color: color)),
+            Text(valor,
+                style: TextStyle(
+                    fontSize: esGrande ? 32 : 20,
+                    fontWeight: FontWeight.bold,
+                    color: color)),
           ],
         ),
       ),
@@ -289,7 +360,9 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 16)),
-          Text(valor, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          Text(valor,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -298,7 +371,9 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
   void _exportarPDF(AppProvider provider, DateTime ahora) {
     // Mejora 2: Exportación a PDF
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('📄 Generando PDF... (funcionalidad lista para implementar con package pdf)')),
+      const SnackBar(
+          content: Text(
+              '📄 Generando PDF... (funcionalidad lista para implementar con package pdf)')),
     );
     // Aquí se implementaría con el package 'pdf' y 'printing'
   }
@@ -306,7 +381,9 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
   void _exportarCSV(AppProvider provider, DateTime ahora) {
     // Mejora 2: Exportación a CSV
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('📊 Generando CSV... (funcionalidad lista para implementar con package csv)')),
+      const SnackBar(
+          content: Text(
+              '📊 Generando CSV... (funcionalidad lista para implementar con package csv)')),
     );
     // Aquí se implementaría con el package 'csv' y 'share_plus'
   }

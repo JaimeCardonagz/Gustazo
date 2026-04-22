@@ -17,7 +17,7 @@ class _PantallaInventarioState extends State<PantallaInventario> {
   late TextEditingController _stockController;
   late TextEditingController _precioController;
   late TextEditingController _gastoController;
-  
+
   Producto? _productoEditando;
 
   @override
@@ -58,7 +58,8 @@ class _PantallaInventarioState extends State<PantallaInventario> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(producto == null ? '➕ Nuevo Producto' : '✏️ Editar Producto'),
+        title:
+            Text(producto == null ? '➕ Nuevo Producto' : '✏️ Editar Producto'),
         content: SingleChildScrollView(
           child: Form(
             key: _formKey,
@@ -67,32 +68,39 @@ class _PantallaInventarioState extends State<PantallaInventario> {
               children: [
                 TextFormField(
                   controller: _nombreController,
-                  decoration: const InputDecoration(labelText: 'Nombre', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      labelText: 'Nombre', border: OutlineInputBorder()),
                   validator: (v) => v!.isEmpty ? 'Requerido' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _categoriaController,
-                  decoration: const InputDecoration(labelText: 'Categoría', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      labelText: 'Categoría', border: OutlineInputBorder()),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _stockController,
-                  decoration: const InputDecoration(labelText: 'Stock inicial', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      labelText: 'Stock inicial', border: OutlineInputBorder()),
                   keyboardType: TextInputType.number,
                   validator: (v) => v!.isEmpty ? 'Requerido' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _precioController,
-                  decoration: const InputDecoration(labelText: 'Precio Venta (\$)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      labelText: 'Precio Venta (\$)',
+                      border: OutlineInputBorder()),
                   keyboardType: TextInputType.number,
                   validator: (v) => v!.isEmpty ? 'Requerido' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _gastoController,
-                  decoration: const InputDecoration(labelText: 'Gasto Reposición (\$)', border: OutlineInputBorder()),
+                  decoration: const InputDecoration(
+                      labelText: 'Gasto Reposición (\$)',
+                      border: OutlineInputBorder()),
                   keyboardType: TextInputType.number,
                   validator: (v) => v!.isEmpty ? 'Requerido' : null,
                 ),
@@ -101,7 +109,9 @@ class _PantallaInventarioState extends State<PantallaInventario> {
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: _guardarProducto,
             child: const Text('Guardar'),
@@ -114,7 +124,8 @@ class _PantallaInventarioState extends State<PantallaInventario> {
   void _guardarProducto() {
     if (_formKey.currentState!.validate()) {
       final producto = Producto(
-        id: _productoEditando?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+        id: _productoEditando?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
         nombre: _nombreController.text,
         categoria: _categoriaController.text,
         stock: double.tryParse(_stockController.text) ?? 0,
@@ -131,7 +142,10 @@ class _PantallaInventarioState extends State<PantallaInventario> {
 
       Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(_productoEditando == null ? 'Producto agregado' : 'Producto actualizado')),
+        SnackBar(
+            content: Text(_productoEditando == null
+                ? 'Producto agregado'
+                : 'Producto actualizado')),
       );
     }
   }
@@ -141,11 +155,12 @@ class _PantallaInventarioState extends State<PantallaInventario> {
     return Consumer<AppProvider>(
       builder: (context, provider, child) {
         final productos = provider.productos;
-        final stockBajo = provider.getProductosConStockBajo();
+        final stockBajo = provider.getProductosConStockBajo(10);
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('📦 Inventario', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            title: const Text('📦 Inventario',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             backgroundColor: Colors.blue,
             foregroundColor: Colors.white,
             actions: [
@@ -154,7 +169,10 @@ class _PantallaInventarioState extends State<PantallaInventario> {
                   padding: const EdgeInsets.only(right: 16),
                   child: Center(
                     child: Chip(
-                      label: Text('⚠️ ${stockBajo.length}', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      label: Text('⚠️ ${stockBajo.length}',
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
                       backgroundColor: Colors.red,
                     ),
                   ),
@@ -174,24 +192,37 @@ class _PantallaInventarioState extends State<PantallaInventario> {
                 color: esStockBajo ? Colors.red.shade50 : null,
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(12),
-                  title: Text(p.nombre, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  title: Text(p.nombre,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('Categoría: ${p.categoria}'),
                       Text(
                         'Stock: ${p.stock.toInt()} ${esStockBajo ? '⚠️ BAJO' : ''}',
-                        style: TextStyle(color: esStockBajo ? Colors.red : null, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            color: esStockBajo ? Colors.red : null,
+                            fontWeight: FontWeight.bold),
                       ),
-                      Text('Precio: \$${p.precioVenta.toStringAsFixed(2)} | Gasto: \$${p.gastoReposicion.toStringAsFixed(2)}'),
-                      Text('Ganancia/unit: \$${p.gananciaUnitaria.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                      Text(
+                          'Precio: \$${p.precioVenta.toStringAsFixed(2)} | Gasto: \$${p.gastoReposicion.toStringAsFixed(2)}'),
+                      Text(
+                          'Ganancia/unit: \$${p.gananciaUnitaria.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                              color: Colors.green,
+                              fontWeight: FontWeight.bold)),
                     ],
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () => _mostrarDialogoProducto(p)),
-                      IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _confirmarEliminar(p)),
+                      IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () => _mostrarDialogoProducto(p)),
+                      IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _confirmarEliminar(p)),
                     ],
                   ),
                 ),
@@ -216,15 +247,19 @@ class _PantallaInventarioState extends State<PantallaInventario> {
         title: const Text('¿Eliminar producto?'),
         content: Text('¿Estás seguro de eliminar "${producto.nombre}"?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancelar')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar')),
           ElevatedButton(
             onPressed: () {
               context.read<AppProvider>().eliminarProducto(producto.id);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Producto eliminado')));
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Producto eliminado')));
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Eliminar', style: TextStyle(color: Colors.white)),
+            child:
+                const Text('Eliminar', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
