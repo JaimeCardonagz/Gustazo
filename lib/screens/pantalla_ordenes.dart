@@ -298,7 +298,7 @@ class _PantallaOrdenesState extends State<PantallaOrdenes> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+                    boxShadow: [BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.1), blurRadius: 10)], // Evita withOpacity deprecated
                   ),
                   child: SafeArea(
                     child: Row(
