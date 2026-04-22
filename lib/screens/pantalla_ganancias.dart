@@ -262,7 +262,12 @@ class _PantallaGananciasState extends State<PantallaGanancias> {
       child: Container(
         padding: EdgeInsets.symmetric(vertical: esGrande ? 24 : 16, horizontal: 12),
         decoration: BoxDecoration(
-          color: Color.fromRGBO(color.red, color.green, color.blue, 0.1), // Evita withOpacity deprecated
+          color: Color.fromRGBO(
+            (color.r * 255.0).round() & 0xff,
+            (color.g * 255.0).round() & 0xff,
+            (color.b * 255.0).round() & 0xff,
+            0.1,
+          ), // Evita conOpacity deprecated usando nueva API
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: color, width: 2),
         ),
