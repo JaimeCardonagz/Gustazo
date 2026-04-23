@@ -45,6 +45,7 @@ class _PantallaOrdenesState extends State<PantallaOrdenes> {
       _metodoPago = MetodoPago.efectivo;
       _propinaSeleccionada = 0.0;
     });
+    _mostrarMenuPedido();
   }
 
   void _cancelarPedido() {
@@ -69,6 +70,187 @@ class _PantallaOrdenesState extends State<PantallaOrdenes> {
         }
       }
     });
+  }
+
+  void _mostrarMenuPedido() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.85,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.orange.shade50,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('📝 TOMAR PEDIDO',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            // Método de pago
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Text('Método:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ToggleButtons(
+                      isSelected: [_metodoPago == MetodoPago.efectivo, _metodoPago == MetodoPago.tarjeta],
+                      onPressed: (index) {
+                        setState(() {
+                          _metodoPago = index == 0 ? MetodoPago.efectivo : MetodoPago.tarjeta;
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      selectedColor: Colors.white,
+                      fillColor: Colors.orange,
+                      color: Colors.black87,
+                      constraints: const BoxConstraints(minWidth: 100, minHeight: 45),
+                      children: const [
+                        Text('💵 Efectivo', style: TextStyle(fontSize: 14)),
+                        Text('💳 Tarjeta', style: TextStyle(fontSize: 14)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Lista de productos con +/-
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: context.watch<AppProvider>().productos.length,
+                itemBuilder: (context, index) {
+                  final producto = context.watch<AppProvider>().productos[index];
+                  final cantidad = _cantidades[producto.id] ?? 0;
+                  final tieneStock = producto.tieneStock(1);
+
+                  return Card(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  producto.nombre,
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '\$${producto.precioVenta.toStringAsFixed(2)}',
+                                  style: TextStyle(fontSize: 14, color: Colors.orange.shade700, fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  producto.tieneStock(10)
+                                      ? 'Stock: ${producto.stock.toInt()}'
+                                      : '⚠️ Stock bajo: ${producto.stock.toInt()}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: producto.tieneStock(10) ? Colors.grey : Colors.red,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Contador +/-
+                          Row(
+                            children: [
+                              _botonContador(
+                                icon: Icons.remove,
+                                color: Colors.red,
+                                enabled: cantidad > 0,
+                                onPressed: () => _removerDelCarrito(producto.id),
+                              ),
+                              Container(
+                                width: 45,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '$cantidad',
+                                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              _botonContador(
+                                icon: Icons.add,
+                                color: Colors.green,
+                                enabled: tieneStock,
+                                onPressed: tieneStock ? () => _agregarAlCarrito(producto.id) : null,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            // Barra inferior con total y botón cobrar
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 10)],
+              ),
+              child: SafeArea(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Total:', style: TextStyle(fontSize: 14)),
+                          Text(
+                            '\$${_totalVenta.toStringAsFixed(2)}',
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
+                          ),
+                        ],
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: _cantidades.isNotEmpty ? _mostrarDialogoMetodoPago : null,
+                      icon: const Icon(Icons.payment, size: 24),
+                      label: const Text('COBRAR', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        minimumSize: const Size(120, 50),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _mostrarDialogoMetodoPago() async {
@@ -348,164 +530,109 @@ class _PantallaOrdenesState extends State<PantallaOrdenes> {
   Widget build(BuildContext context) {
     return Consumer<AppProvider>(
       builder: (context, provider, child) {
-        final productos = provider.productos;
+        final ordenesDelDia = provider.ordenes
+            .where((o) {
+              final ahora = DateTime.now();
+              return o.fechaCreacion.year == ahora.year &&
+                  o.fechaCreacion.month == ahora.month &&
+                  o.fechaCreacion.day == ahora.day;
+            })
+            .toList();
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('📝 Nueva Orden', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            title: const Text('📝 Órdenes', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
             elevation: 2,
             backgroundColor: Colors.orange,
             foregroundColor: Colors.white,
           ),
           body: Column(
             children: [
-              // Selector de método de pago
+              // Botón TOMAR PEDIDO
               Container(
-                padding: const EdgeInsets.all(12),
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
                 color: Colors.orange.shade50,
-                child: Row(
-                  children: [
-                    const Text('Método de pago:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ToggleButtons(
-                        isSelected: [_metodoPago == MetodoPago.efectivo, _metodoPago == MetodoPago.tarjeta],
-                        onPressed: (index) {
-                          setState(() {
-                            _metodoPago = index == 0 ? MetodoPago.efectivo : MetodoPago.tarjeta;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(10),
-                        selectedColor: Colors.white,
-                        fillColor: Colors.orange,
-                        color: Colors.black87,
-                        constraints: const BoxConstraints(minWidth: 100, minHeight: 50),
-                        children: const [
-                          Text('💵 Efectivo', style: TextStyle(fontSize: 16)),
-                          Text('💳 Tarjeta', style: TextStyle(fontSize: 16)),
-                        ],
-                      ),
-                    ),
-                  ],
+                child: ElevatedButton.icon(
+                  onPressed: _iniciarPedido,
+                  icon: const Icon(Icons.add_shopping_cart, size: 28),
+                  label: const Text('TOMAR PEDIDO', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    minimumSize: const Size(double.infinity, 60),
+                  ),
                 ),
               ),
 
-              // Lista de productos
+              // Lista de pedidos del día
               Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: productos.length,
-                  itemBuilder: (context, index) {
-                    final producto = productos[index];
-                    final cantidad = _cantidades[producto.id] ?? 0;
-                    final tieneStock = producto.tieneStock(1);
-
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 3,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
+                child: ordenesDelDia.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    producto.nombre,
-                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    '\$${producto.precioVenta.toStringAsFixed(2)}',
-                                    style: TextStyle(fontSize: 16, color: Colors.orange.shade700, fontWeight: FontWeight.bold),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    producto.tieneStock(10) 
-                                        ? 'Stock: ${producto.stock.toInt()}' 
-                                        : '⚠️ Stock bajo: ${producto.stock.toInt()}',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: producto.tieneStock(10) ? Colors.grey : Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey.shade300),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No hay pedidos hoy',
+                              style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
                             ),
-                            // Contador +/-
-                            Row(
-                              children: [
-                                _botonContador(
-                                  icon: Icons.remove,
-                                  color: Colors.red,
-                                  enabled: cantidad > 0,
-                                  onPressed: () => _removerDelCarrito(producto.id),
-                                ),
-                                Container(
-                                  width: 50,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    '$cantidad',
-                                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                                _botonContador(
-                                  icon: Icons.add,
-                                  color: Colors.green,
-                                  enabled: tieneStock,
-                                  onPressed: tieneStock ? () => _agregarAlCarrito(producto.id) : null,
-                                ),
-                              ],
+                            const SizedBox(height: 8),
+                            Text(
+                              'Presiona "TOMAR PEDIDO" para comenzar',
+                              style: TextStyle(fontSize: 14, color: Colors.grey.shade400),
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              // Barra inferior con total y botón de pagar
-              if (_cantidades.isNotEmpty)
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [BoxShadow(color: Color.fromRGBO(0, 0, 0, 0.1), blurRadius: 10)], // Evita withOpacity deprecated
-                  ),
-                  child: SafeArea(
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Total:', style: TextStyle(fontSize: 16)),
-                              Text(
-                                '\$${_totalVenta.toStringAsFixed(2)}',
-                                style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.green),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(12),
+                        itemCount: ordenesDelDia.length,
+                        itemBuilder: (context, index) {
+                          final orden = ordenesDelDia[index];
+                          final hora = '${orden.fechaCreacion.hour.toString().padLeft(2, '0')}:${orden.fechaCreacion.minute.toString().padLeft(2, '0')}';
+                          
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.all(16),
+                              leading: CircleAvatar(
+                                backgroundColor: orden.estado == EstadoOrden.completada ? Colors.green : Colors.orange,
+                                child: Icon(
+                                  orden.estado == EstadoOrden.completada ? Icons.check : Icons.access_time,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ],
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: _mostrarDialogoPropina,
-                          icon: const Icon(Icons.payment, size: 28),
-                          label: const Text('COBRAR', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                            minimumSize: const Size(150, 60),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                              title: Text(
+                                'Pedido #${orden.id.substring(orden.id.length - 6)}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 8),
+                                  Text('$hora - ${orden.items.length} items'),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Total: \$${orden.totalConPropina.toStringAsFixed(2)}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.green),
+                                  ),
+                                ],
+                              ),
+                              trailing: Icon(
+                                orden.metodoPago == MetodoPago.efectivo ? Icons.money : Icons.credit_card,
+                                color: Colors.grey,
+                              ),
+                              onTap: () => _verDetalleOrden(orden),
+                            ),
+                          );
+                        },
+                      ),
+              ),
             ],
           ),
         );
